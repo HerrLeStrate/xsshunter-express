@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const mustache = require('mustache');
 const fs = require('fs');
+const exec = require('child_process').exec;
 
 const XSS_PAYLOAD_FIRE_EMAIL_TEMPLATE = fs.readFileSync(
 	'./templates/xss_email_template.htm',
@@ -34,4 +35,9 @@ async function send_email_notification(xss_payload_fire_data) {
 	console.log("Message sent: %s", info.messageId);
 }
 
+async function send_notify_notification(xss_payload_fire_data, provider_config_name = "config") {
+	exec(`echo ${xss_payload_fire_data} | /opt/notify -bulk -provider-config /app/providers/${provider_config_name}.yaml`)
+}
+
 module.exports.send_email_notification = send_email_notification;
+module.exports.send_notify_notification = send_notify_notification;

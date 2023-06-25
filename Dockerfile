@@ -1,3 +1,7 @@
+FROM golang:1.19 as gobuilder
+
+RUN go install -v github.com/projectdiscovery/notify/cmd/notify@latest
+
 FROM node:12
 
 # Set up directory for the server
@@ -26,6 +30,10 @@ COPY utils.js /app/
 COPY docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 COPY templates /app/templates
+
+# Notify feature
+COPY providers /app/providers
+COPY --from=gobuilder /go/bin/notify /opt/notify
 
 # Expose both HTTP and HTTPS ports
 EXPOSE 80
