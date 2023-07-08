@@ -8,6 +8,11 @@ const XSS_PAYLOAD_FIRE_EMAIL_TEMPLATE = fs.readFileSync(
 	'utf8'
 );
 
+const XSS_PAYLOAD_FIRE_TELEGRAM_TEMPLATE = fs.readFileSync(
+	'./templates/xss_telegram_template.md',
+	'utf8'
+);
+
 async function send_email_notification(xss_payload_fire_data) {
 	const transporter = nodemailer.createTransport({
 		host: process.env.SMTP_HOST,
@@ -36,7 +41,12 @@ async function send_email_notification(xss_payload_fire_data) {
 }
 
 async function send_notify_notification(xss_payload_fire_data, provider_config_name = "config") {
-	exec(`echo ${xss_payload_fire_data} | /opt/notify -bulk -provider-config /app/providers/${provider_config_name}.yaml`)
+	const notification_md_telegram = mustache.render(
+		XSS_PAYLOAD_FIRE_TELEGRAM_TEMPLATE,
+		xss_payload_fire_data
+	);
+
+	exec(`echo '${notification_md_telegram}' | /opt/notify -bulk -provider-config /app/providers/${provider_config_name}.yaml`)
 }
 
 module.exports.send_email_notification = send_email_notification;
